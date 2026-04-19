@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Открой меня 💛</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&family=Caveat:wght@400;700&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  min-height: 100vh;
+  background: #fff5f7;
+  font-family: 'Nunito', sans-serif;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  touch-action: manipulation;
+}
+
+canvas#confetti {
+  position: fixed;
+  inset: 0;
+  width: 100%; height: 100%;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* COVER */
+#cover {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #fff5f7;
+  transition: opacity 0.45s ease;
+}
+#cover.hidden { opacity: 0; pointer-events: none; }
+
+.cover-card {
+  width: min(320px, 86vw);
+  background: #fff;
+  border-radius: 28px;
+  border: 2.5px solid #ffd6e0;
+  box-shadow: 0 12px 60px rgba(255,140,170,0.25), 0 4px 16px rgba(0,0,0,0.06);
+  padding: 48px 28px 40px;
+  text-align: center;
+  cursor: pointer;
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+.cover-card:hover {
+  transform: scale(1.03) translateY(-4px);
+  box-shadow: 0 20px 80px rgba(255,140,170,0.3), 0 6px 24px rgba(0,0,0,0.08);
+}
+.cover-card:active { transform: scale(0.97); }
+
+.cover-envelope {
+  display: block;
+  font-size: 72px;
+  margin-bottom: 20px;
+  animation: env-bounce 2s ease-in-out infinite;
+}
+@keyframes env-bounce {
+  0%,100%{ transform: translateY(0) rotate(-4deg); }
+  50%    { transform: translateY(-10px) rotate(4deg); }
+}
+
+.cover-title {
+  font-family: 'Caveat', cursive;
+  font-size: 36px;
+  font-weight: 700;
+  color: #ff6b8a;
+  margin-bottom: 8px;
+}
+.cover-sub { font-size: 15px; color: #bbb; margin-bottom: 26px; }
+
+.cover-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: linear-gradient(135deg, #ff8fa8, #ffb3c6);
+  color: #fff;
+  font-family: 'Nunito', sans-serif;
+  font-size: 16px;
+  font-weight: 900;
+  padding: 12px 28px;
+  border-radius: 50px;
+  border: none;
+  cursor: pointer;
+  touch-action: manipulation;
+  box-shadow: 0 6px 24px rgba(255,120,160,0.4);
+  animation: btn-pulse 2s ease-in-out infinite;
+}
+@keyframes btn-pulse {
+  0%,100%{ box-shadow: 0 6px 24px rgba(255,120,160,0.4); }
+  50%    { box-shadow: 0 8px 36px rgba(255,120,160,0.65); }
+}
+
+/* BURST */
+#burst {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+.ring {
+  width: 0; height: 0;
+  border-radius: 50%;
+  background: radial-gradient(circle, #ffe0ea 0%, transparent 70%);
+  opacity: 0;
+  transform: scale(0);
+  transition: transform 0.65s cubic-bezier(0.16,1,0.3,1), opacity 0.65s ease;
+}
+.ring.go { width: 250vmax; height: 250vmax; opacity: 1; transform: scale(1); }
+.ring.fade { opacity: 0; transform: scale(1.15); transition: opacity 0.4s ease, transform 0.4s ease; }
+
+/* MAIN */
+#main {
+  position: relative;
+  z-index: 10;
+  width: min(500px, 92vw);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 24px 0 32px;
+  opacity: 0;
+  transform: translateY(28px) scale(0.95);
+  transition: opacity 0.55s cubic-bezier(0.16,1,0.3,1), transform 0.55s cubic-bezier(0.16,1,0.3,1);
+  overflow-y: auto;
+  max-height: 100vh;
+}
+#main.visible { opacity: 1; transform: translateY(0) scale(1); }
+
+.card {
+  background: #fff;
+  border-radius: 24px;
+  border: 2.5px solid #ffd6e0;
+  box-shadow: 0 4px 24px rgba(255,150,180,0.12);
+  overflow: hidden;
+}
+
+/* TOP */
+.top-inner { padding: 30px 26px 22px; text-align: center; }
+
+.emoji-row {
+  font-size: 32px;
+  display: flex; justify-content: center; gap: 8px;
+  margin-bottom: 14px;
+}
+.emoji-row span { display: inline-block; animation: wobble 2.5s ease-in-out infinite; }
+.emoji-row span:nth-child(1){animation-delay:0s}
+.emoji-row span:nth-child(2){animation-delay:.3s}
+.emoji-row span:nth-child(3){animation-delay:.6s}
+.emoji-row span:nth-child(4){animation-delay:.9s}
+.emoji-row span:nth-child(5){animation-delay:1.2s}
+
+@keyframes wobble {
+  0%,100%{ transform: rotate(-8deg) scale(1); }
+  50%    { transform: rotate(8deg) scale(1.15); }
+}
+
+.headline {
+  font-family: 'Caveat', cursive;
+  font-size: 40px; font-weight: 700;
+  color: #ff6b8a; line-height: 1.1;
+  margin-bottom: 10px;
+}
+.subline { font-size: 15px; color: #aaa; line-height: 1.65; }
+.subline strong { color: #ff8fa8; font-weight: 700; }
+
+.badges {
+  display: flex; gap: 8px; flex-wrap: wrap;
+  justify-content: center; margin-top: 16px;
+}
+.badge {
+  background: #fff0f5; border: 1.5px solid #ffd6e0;
+  border-radius: 50px; padding: 5px 14px;
+  font-size: 12px; font-weight: 700; color: #ff6b8a;
+}
+
+/* MUSIC */
+.music-header {
+  background: linear-gradient(135deg, #ff8fa8 0%, #ffb3c6 100%);
+  padding: 13px 18px;
+  display: flex; align-items: center; gap: 10px;
+}
+.music-icon {
+  width: 34px; height: 34px;
+  background: rgba(255,255,255,0.3); border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 17px; flex-shrink: 0;
+}
+.music-info { flex: 1; }
+.music-title { font-size: 15px; font-weight: 900; color: #fff; line-height: 1.2; }
+.music-artist { font-size: 12px; color: rgba(255,255,255,0.8); }
+
+.now-playing {
+  background: rgba(255,255,255,0.25); border-radius: 50px;
+  padding: 3px 10px; font-size: 11px; font-weight: 700; color: #fff;
+  display: flex; align-items: center; gap: 5px; flex-shrink: 0;
+}
+.dot { width: 7px; height: 7px; background: #fff; border-radius: 50%; animation: blink 1s ease-in-out infinite; }
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+.yt-link {
+  display: block;
+  position: relative;
+  text-decoration: none;
+  background: #000;
+  -webkit-tap-highlight-color: transparent;
+}
+.yt-link img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16/9;
+  object-fit: cover;
+  opacity: 0.85;
+}
+.yt-play-btn {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.yt-play-btn svg { filter: drop-shadow(0 2px 12px rgba(0,0,0,0.5)); }
+
+.note { padding: 16px 20px; text-align: center; }
+.note-text { font-family: 'Caveat', cursive; font-size: 20px; color: #ccc; }
+.note-text span { color: #ff8fa8; }
+
+/* FLOAT */
+.float-layer { position: fixed; inset: 0; pointer-events: none; z-index: 1; overflow: hidden; }
+.fh { position: absolute; animation: floatUp linear infinite; opacity: 0; }
+@keyframes floatUp {
+  0%  { transform: translateY(0) rotate(0deg); opacity: 0; }
+  10% { opacity: 0.7; }
+  90% { opacity: 0.4; }
+  100%{ transform: translateY(-115vh) rotate(360deg); opacity: 0; }
+}
+</style>
+</head>
+<body>
+
+<canvas id="confetti"></canvas>
+<div class="float-layer" id="floatLayer"></div>
+
+<div id="cover">
+  <div class="cover-card" onclick="openCard()">
+    <span class="cover-envelope">💌</span>
+    <div class="cover-title">Тебе открытка!</div>
+    <div class="cover-sub">Нажми, чтобы открыть</div>
+    <button class="cover-btn" onclick="openCard()">Открыть 🎉</button>
+  </div>
+</div>
+
+<div id="burst"><div class="ring" id="ring"></div></div>
+
+<div id="main">
+  <div class="card">
+    <div class="top-inner">
+      <div class="emoji-row">
+        <span>🌸</span><span>💛</span><span>✨</span><span>🎉</span><span>🌼</span>
+      </div>
+      <div class="headline">Привет, дружище!</div>
+      <div class="subline">
+        Ты классный человек — просто хотел(а) напомнить.<br>
+        <strong>Специально для тебя!</strong>
+      </div>
+      <div class="badges">
+        <div class="badge">🌟 Лучший друг</div>
+        <div class="badge">🎵 С твоей песней</div>
+        <div class="badge">💛 С теплом</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="music-header">
+      <div class="music-icon">🎵</div>
+      <div class="music-info">
+        <div class="music-title">Дрянь</div>
+        <div class="music-artist">Комиссар · 90-е</div>
+      </div>
+      <div class="now-playing"><div class="dot"></div>Слушать</div>
+    </div>
+    <a class="yt-link" href="https://www.youtube.com/watch?v=qAIAhAuNtWs" target="_blank">
+      <img src="https://img.youtube.com/vi/qAIAhAuNtWs/hqdefault.jpg" alt="Комиссар — Дрянь" />
+      <div class="yt-play-btn">
+        <svg viewBox="0 0 68 48" width="72" height="52">
+          <path d="M66.5 7.7A8.5 8.5 0 0 0 60.3 1.5C55 0 34 0 34 0S13 0 7.7 1.5A8.5 8.5 0 0 0 1.5 7.7C0 13 0 24 0 24s0 11 1.5 16.3a8.5 8.5 0 0 0 6.2 6.2C13 48 34 48 34 48s21 0 26.3-1.5a8.5 8.5 0 0 0 6.2-6.2C68 35 68 24 68 24s0-11-1.5-16.3z" fill="#ff0000"/>
+          <path d="M27 34l18-10-18-10v20z" fill="#fff"/>
+        </svg>
+      </div>
+    </a>
+    <div class="note">
+      <div class="note-text">твой личный гимн <span>🎤</span></div>
+    </div>
+  </div>
+</div>
+
+<script>
+// Floating icons (hidden until open)
+const floatLayer = document.getElementById('floatLayer');
+const icons = ['💛','🌸','✨','🌼','💕','🎀','⭐','🌻'];
+function spawnFloaters() {
+  for (let i = 0; i < 18; i++) {
+    const el = document.createElement('div');
+    el.className = 'fh';
+    el.textContent = icons[Math.floor(Math.random() * icons.length)];
+    el.style.left = Math.random() * 100 + 'vw';
+    el.style.bottom = '-40px';
+    el.style.fontSize = (12 + Math.random() * 16) + 'px';
+    const dur = 8 + Math.random() * 12;
+    el.style.animationDuration = dur + 's';
+    el.style.animationDelay = (Math.random() * dur) + 's';
+    floatLayer.appendChild(el);
+  }
+}
+
+// Confetti
+const canvas = document.getElementById('confetti');
+const ctx = canvas.getContext('2d');
+function resize() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+resize(); window.addEventListener('resize', resize);
+
+const COLORS = ['#ff8fa8','#ffb3c6','#ffd6e0','#ffe0a0','#c4f0c8','#a0d4ff','#ffcc80'];
+class Piece {
+  constructor(burst) { this.init(burst); }
+  init(burst) {
+    this.x  = Math.random() * canvas.width;
+    this.y  = burst ? canvas.height / 2 + (Math.random()-0.5)*60 : -20;
+    this.w  = 5 + Math.random() * 9;
+    this.h  = 4 + Math.random() * 6;
+    this.vx = (Math.random()-0.5) * (burst ? 9 : 2.5);
+    this.vy = burst ? (-7 - Math.random()*6) : (1.2 + Math.random()*2.5);
+    this.g  = burst ? 0.2 : 0;
+    this.rot = Math.random() * Math.PI * 2;
+    this.rv  = (Math.random()-0.5) * 0.14;
+    this.color = COLORS[Math.floor(Math.random() * COLORS.length)];
+    this.a  = 0.85; this.life = 1;
+  }
+  update() {
+    this.vy += this.g; this.x += this.vx; this.y += this.vy; this.rot += this.rv;
+    if (this.g) this.life -= 0.009;
+    if (this.y > canvas.height + 20 || this.life <= 0) {
+      if (!this.g) this.init(false); else this.a = 0;
+    }
+  }
+  draw() {
+    if (this.a <= 0) return;
+    ctx.save();
+    ctx.globalAlpha = this.a * (this.g ? this.life : 1);
+    ctx.translate(this.x, this.y); ctx.rotate(this.rot);
+    ctx.fillStyle = this.color;
+    ctx.fillRect(-this.w/2, -this.h/2, this.w, this.h);
+    ctx.restore();
+  }
+}
+
+let pieces = [];
+(function loop() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  pieces.forEach(p => { p.update(); p.draw(); });
+  requestAnimationFrame(loop);
+})();
+
+function openCard() {
+  const cover = document.getElementById('cover');
+  const ring  = document.getElementById('ring');
+  const main  = document.getElementById('main');
+
+  ring.classList.add('go');
+  setTimeout(() => cover.classList.add('hidden'), 220);
+  for (let i = 0; i < 90; i++) pieces.push(new Piece(true));
+  setTimeout(() => { ring.classList.remove('go'); ring.classList.add('fade'); }, 650);
+  setTimeout(() => { main.classList.add('visible'); spawnFloaters(); }, 370);
+  setTimeout(() => {
+    for (let i = 0; i < 50; i++) {
+      const p = new Piece(false); p.y = -20 - Math.random()*120; pieces.push(p);
+    }
+  }, 750);
+}
+</script>
+</body>
+</html>
